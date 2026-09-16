@@ -1,0 +1,186 @@
+{# ================================================================
+   emploi.html — Emploi du Temps (vue grille hebdomadaire)
+   Variables reçues :
+     - classes        : liste de toutes les classes
+     - current_classe : dict {id_classe, nom_classe} ou None
+     - semaines       : liste de dicts {lundi, jours_dates, par_jour}
+     - creneaux       : liste de (hd_str, hf_str) triée
+     - profs          : liste des professeurs
+     - jours_noms     : ['Lundi'…'Vendredi']
+     - today          : date du jour
+================================================================ #}
+{% extends 'admin/layout.html' %}
+
+{% block title %}EduLink — Planning{% endblock %}
+
+{% block content %}
+
+    {# ── En-tête avec sélecteur de classe ────────────────────── #}
+    <header class="page-header"
+            style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1.5rem;">
+        <div>
+            <h2>Emploi du Temps</h2>
+            <p>Gérez les cours planifiés par formation.</p>
+        </div>
+        <form action="{{ url_for('admin.emploi_page') }}" method="GET"
+              class="card" style="padding:1rem 1.25rem; margin-bottom:0; min-width:280px;">
+            <label style="font-size:0.75rem; font-weight:600; color:var(--gray-medium);
+                          text-transform:uppercase; letter-spacing:0.05em;">
+                Choisir une classe
+            </label>
+            <select name="classe_id" id="classe-select" class="select-modern"
+                    style="margin-top:0.5rem;">
+                <option value="">-- Sélectionner --</option>
+                {% for c in classes %}
+                <option value="{{ c.id_classe }}"
+                    {% if current_classe and current_classe.id_classe == c.id_classe %}selected{% endif %}>
+                    {{ c.nom_classe }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </header>
+
+    {% if current_classe %}
+
+    {# ── Formulaire d'ajout ──────────────────────────────────── #}
+    <div class="card" style="margin-top:2rem; margin-bottom:2rem;">
+        <h3 style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="bi bi-calendar-plus" style="color:var(--gray-medium);"></i>
+            Ajouter un cours — {{ current_classe.nom_classe }}
+        </h3>
+        <form action="{{ url_for('admin.add_cours') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="id_classe" value="{{ current_classe.id_classe }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Intervenant</label>
+                    <select name="id_prof" class="select-modern" required>
+                        <option value="">-- Sélectionner un professeur --</option>
+                        {% for p in profs %}
+                        <option value="{{ p.id_user }}">
+                            {{ p.prenom }} {{ p.nom }} — {{ p.matiere }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Heure de début</label>
+                    <input type="time" name="heure_debut" required>
+                </div>
+                <div class="form-group">
+                    <label>Heure de fin</label>
+                    <input type="time" name="heure_fin" required>
+                </div>
+                <div class="form-group">
+                    <label>Salle</label>
+                    <input type="text" name="salle" placeholder="Ex: A101" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary" style="width:auto;">
+                <i class="bi bi-plus-circle"></i> Ajouter au planning
+            </button>
+        </form>
+    </div>
+
+    {# ── Grille hebdomadaire ──────────────────────────────────── #}
+    {% if semaines %}
+        {% for sem in semaines %}
+        <div class="card" style="margin-bottom:2rem; padding:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="display:flex; align-items:center; gap:0.5rem; color:var(--blue-primary); margin:0;">
+                    <i class="bi bi-calendar3"></i>
+                    Semaine du {{ sem.lundi.strftime('%d/%m/%Y') }}
+                    au {{ sem.jours_dates[4].strftime('%d/%m/%Y') }}
+                </h3>
+            </div>
+
+            <div class="table-overflow">
+                <table class="admin-edt-table">
+                    <thead>
+                        <tr>
+                            <th class="admin-edt-th-time">Horaire</th>
+                            {% for i in range(5) %}
+                            <th class="admin-edt-th-day{% if sem.jours_dates[i] == today %} admin-edt-today-header{% endif %}">
+                                {{ jours_noms[i] }}
+                                <span class="admin-edt-th-date">{{ sem.jours_dates[i].strftime('%d/%m') }}</span>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hd, hf in creneaux %}
+                        <tr>
+                            <td class="admin-edt-td-time">
+                                <span class="admin-edt-time-start">{{ hd }}</span>
+                                <span class="admin-edt-time-end">{{ hf }}</span>
+                            </td>
+                            {% for j in range(5) %}
+                            {% set cours = sem.par_jour.get(j, {}).get(hd) %}
+                            <td class="admin-edt-td-cell{% if sem.jours_dates[j] == today %} admin-edt-today-col{% endif %}">
+                                {% if cours %}
+                                <div class="admin-edt-pill">
+                                    <div class="admin-edt-matiere">{{ cours.matiere }}</div>
+                                    <div class="admin-edt-prof">
+                                        <i class="bi bi-person"></i> {{ cours.prenom }} {{ cours.nom }}
+                                    </div>
+                                    {% if cours.salle %}
+                                    <div class="admin-edt-salle">
+                                        <i class="bi bi-geo-alt"></i> {{ cours.salle }}
+                                    </div>
+                                    {% endif %}
+                                    <form action="{{ url_for('admin.delete_cours', id_cours=cours.id_cours) }}"
+                                          method="POST"
+                                          onsubmit="return confirm('Supprimer ce cours ?');"
+                                          style="margin:0; margin-top:0.4rem;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="classe_id" value="{{ current_classe.id_classe }}">
+                                        <button type="submit" class="admin-edt-delete" title="Supprimer">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+
+    {% else %}
+    <div class="card" style="text-align:center; padding:3rem;">
+        <i class="bi bi-calendar-x"
+           style="font-size:2.5rem; color:var(--gray-medium); display:block; margin-bottom:1rem; opacity:0.4;"></i>
+        Aucun cours programmé pour cette formation.
+    </div>
+    {% endif %}
+
+    {% else %}
+    {# ── Aucune classe sélectionnée ───────────────────────────── #}
+    <div style="text-align:center; margin-top:5rem;">
+        <div class="card" style="display:inline-block; padding:3rem 4rem;">
+            <i class="bi bi-calendar-week"
+               style="font-size:3rem; color:var(--blue-primary); display:block; margin-bottom:1rem;"></i>
+            <h3 style="margin-bottom:0.5rem;">Sélectionnez une formation</h3>
+            <p style="color:var(--gray-medium);">
+                Utilisez le menu ci-dessus pour afficher un emploi du temps.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_emploi.js') }}"></script>
+{% endblock %}

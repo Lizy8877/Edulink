@@ -1,0 +1,70 @@
+{% extends "prof/base.html" %}
+{% block title %}Emploi du temps{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📅 Emploi du temps</h1>
+    <p class="page-subtitle">Planning hebdomadaire — {{ matiere if matiere else 'Vos cours' }}</p>
+</div>
+
+{% if semaines %}
+    {% for sem in semaines %}
+    <div class="section-card edt-section">
+        <div class="section-card-header">
+            <span class="section-card-title">
+                Semaine du {{ sem.lundi.strftime('%d/%m/%Y') }}
+                au {{ sem.jours_dates[4].strftime('%d/%m/%Y') }}
+            </span>
+        </div>
+
+        <div class="edt-wrapper">
+            <table class="edt-table">
+                <thead>
+                    <tr>
+                        <th class="edt-th-time">Horaire</th>
+                        {% for i in range(5) %}
+                        <th class="edt-th-day{% if sem.jours_dates[i] == today %} edt-today-header{% endif %}">
+                            {{ jours_noms[i] }}
+                            <span class="edt-th-date">{{ sem.jours_dates[i].strftime('%d/%m') }}</span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hd, hf in creneaux %}
+                    <tr class="edt-row">
+                        <td class="edt-td-time">
+                            <span class="edt-time-start">{{ hd }}</span>
+                            <span class="edt-time-end">{{ hf }}</span>
+                        </td>
+                        {% for j in range(5) %}
+                        {% set cours = sem.par_jour.get(j, {}).get(hd) %}
+                        <td class="edt-td-cell{% if sem.jours_dates[j] == today %} edt-today-col{% endif %}">
+                            {% if cours %}
+                            <div class="edt-cours-pill">
+                                <div class="edt-cours-classe">{{ cours.nom_classe }}</div>
+                                {% if cours.salle %}
+                                <div class="edt-cours-salle">{{ cours.salle }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+
+{% else %}
+    <div class="section-card">
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Aucun cours n'est planifié pour le moment.<br>
+            L'administrateur est responsable de la création des emplois du temps.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

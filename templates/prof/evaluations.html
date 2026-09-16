@@ -1,0 +1,102 @@
+{% extends "prof/base.html" %}
+{% block title %}Évaluations{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📋 Évaluations & Projets</h1>
+    <p class="page-subtitle">Créez et gérez vos évaluations par classe</p>
+</div>
+
+<!-- Formulaire de création -->
+<div class="form-panel">
+    <div class="form-panel-title">➕ Créer une nouvelle évaluation / projet</div>
+    <form method="POST" action="{{ url_for('prof.creer_evaluation') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="nom_eval">Nom de l'évaluation *</label>
+                <input type="text" id="nom_eval" name="nom_eval" placeholder="Ex : DS Chapitre 3, Projet DevSecOps…" required maxlength="150">
+            </div>
+            <div class="form-group">
+                <label for="id_classe">Classe *</label>
+                <select id="id_classe" name="id_classe" required>
+                    <option value="">— Sélectionner une classe —</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id_classe }}">{{ c.nom_classe }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="date_fin">Date limite *</label>
+                <input type="date" id="date_fin" name="date_fin" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description (optionnel)</label>
+                <input type="text" id="description" name="description" placeholder="Consignes, barème…" maxlength="255">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:auto;margin-top:0.5rem;">Créer l'évaluation</button>
+    </form>
+</div>
+
+<!-- Liste des évaluations -->
+<div class="section-card">
+    <div class="section-card-header">
+        <span class="section-card-title">Toutes vos évaluations</span>
+        <span class="badge badge-blue">{{ evals | length }}</span>
+    </div>
+
+    {% if evals %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Évaluation</th>
+                    <th>Classe</th>
+                    <th>Description</th>
+                    <th>Date limite</th>
+                    <th>Notes saisies</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ev in evals %}
+                <tr>
+                    <td><strong>{{ ev.nom_eval }}</strong></td>
+                    <td><span class="badge badge-blue">{{ ev.nom_classe }}</span></td>
+                    <td style="max-width:180px;font-size:0.85rem;color:var(--gray-medium);">
+                        {{ ev.description if ev.description else '—' }}
+                    </td>
+                    <td>
+                        {% if ev.date_fin %}
+                            {{ ev.date_fin.strftime('%d/%m/%Y') }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        <span class="badge {% if ev.nb_notes > 0 %}badge-green{% else %}badge-yellow{% endif %}">
+                            {{ ev.nb_notes }} note{{ 's' if ev.nb_notes > 1 }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <a href="{{ url_for('prof.notes') }}" class="btn btn-secondary" style="font-size:0.78rem;padding:0.3rem 0.65rem;">Notes</a>
+                            <form method="POST" action="{{ url_for('prof.supprimer_evaluation', id_eval=ev.id_eval) }}"
+                                  onsubmit="return confirm('Supprimer cette évaluation et toutes ses notes ?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger" style="font-size:0.78rem;padding:0.3rem 0.65rem;">Supprimer</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Aucune évaluation créée. Utilisez le formulaire ci-dessus pour commencer.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

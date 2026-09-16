@@ -1,0 +1,83 @@
+{% extends "eleve/base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Bonjour, {{ prenom }} 👋</h1>
+    <p class="page-subtitle">Vue d'ensemble de votre espace élève</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div>
+            <div class="stat-value">{{ nb_notes }}</div>
+            <div class="stat-label">Note{{ 's' if nb_notes > 1 }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div>
+            <div class="stat-value">{{ moyenne if moyenne else '—' }}</div>
+            <div class="stat-label">Moyenne générale{{ ' / 20' if moyenne }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="two-col">
+    <!-- Prochain cours -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <span class="section-card-title">📅 Prochain cours</span>
+            <a href="{{ url_for('eleve.emploi_du_temps') }}" class="btn btn-secondary"
+               style="font-size:0.78rem; padding:0.35rem 0.8rem;">Voir tout</a>
+        </div>
+        {% if prochain_cours %}
+            <div class="cours-card" style="border-left-color:var(--accent);">
+                <div class="cours-time">
+                    {{ prochain_cours.date.strftime('%d/%m/%Y') }}<br>
+                    {{ prochain_cours.hd_str }} → {{ prochain_cours.hf_str }}
+                </div>
+                <div class="cours-info">
+                    <div class="cours-classe">{{ prochain_cours.matiere }}</div>
+                    <div class="cours-salle">
+                        {{ prochain_cours.prenom }} {{ prochain_cours.nom }}
+                        {% if prochain_cours.salle %} — Salle {{ prochain_cours.salle }}{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>Aucun cours à venir.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Dernières notes -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <span class="section-card-title">📝 Dernières notes</span>
+            <a href="{{ url_for('eleve.notes') }}" class="btn btn-secondary"
+               style="font-size:0.78rem; padding:0.35rem 0.8rem;">Voir tout</a>
+        </div>
+        {% if dernieres_notes %}
+            {% for n in dernieres_notes %}
+            <div style="display:flex; align-items:center; justify-content:space-between;
+                        padding:0.5rem 0; border-bottom:1px solid var(--gray-light);">
+                <span style="font-size:0.9rem;">{{ n.nom_eval }}</span>
+                <span class="badge {% if n.note >= 14 %}badge-green{% elif n.note >= 10 %}badge-yellow{% else %}badge-red{% endif %}">
+                    {{ n.note }}/20
+                </span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>Aucune note pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduLink — {% block title %}Professeur{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/prof.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">EduLink</span>
+            </div>
+            <div class="sidebar-role">Espace Professeur</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('prof.dashboard') }}"
+               class="nav-item {% if request.endpoint == 'prof.dashboard' %}active{% endif %}">
+                <span class="nav-icon">🏠</span> Tableau de bord
+            </a>
+            <a href="{{ url_for('prof.mes_classes') }}"
+               class="nav-item {% if request.endpoint == 'prof.mes_classes' %}active{% endif %}">
+                <span class="nav-icon">👥</span> Mes classes
+            </a>
+            <a href="{{ url_for('prof.evaluations') }}"
+               class="nav-item {% if request.endpoint in ['prof.evaluations', 'prof.creer_evaluation'] %}active{% endif %}">
+                <span class="nav-icon">📋</span> Évaluations
+            </a>
+            <a href="{{ url_for('prof.notes') }}"
+               class="nav-item {% if request.endpoint in ['prof.notes', 'prof.attribuer_note'] %}active{% endif %}">
+                <span class="nav-icon">📝</span> Notes
+            </a>
+            <a href="{{ url_for('prof.emploi_du_temps') }}"
+               class="nav-item {% if request.endpoint == 'prof.emploi_du_temps' %}active{% endif %}">
+                <span class="nav-icon">📅</span> Emploi du temps
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="user-avatar">{{ prenom[0] }}{{ nom[0] }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ prenom }} {{ nom }}</div>
+                    <div class="user-matiere">{{ matiere if matiere else 'Professeur' }}</div>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('auth.logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-logout">Déconnexion</button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">
+                        <span>{{ '✓' if category == 'success' else '⚠' }}</span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% extends "prof/base.html" %}
+{% block title %}Mes classes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">👥 Mes classes</h1>
+    <p class="page-subtitle">Liste des classes qui vous sont attribuées et de leurs élèves</p>
+</div>
+
+{% if classes %}
+    {% for classe in classes %}
+    <div class="classe-card">
+        <div class="classe-header">
+            <span class="classe-name">{{ classe.nom_classe }}</span>
+            <span class="classe-count">{{ classe.eleves | length }} élève{{ 's' if classe.eleves|length > 1 }}</span>
+        </div>
+        <div class="classe-body">
+            {% if classe.eleves %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Identifiant</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eleve in classe.eleves %}
+                        <tr>
+                            <td><strong>{{ eleve.nom }}</strong></td>
+                            <td>{{ eleve.prenom }}</td>
+                            <td><span style="color:var(--gray-medium);font-size:0.85rem;">{{ eleve.compte }}</span></td>
+                            <td>
+                                <a href="{{ url_for('prof.notes') }}" class="btn btn-secondary" style="font-size:0.78rem;padding:0.3rem 0.65rem;">Voir les notes</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">👤</div>
+                    <p>Aucun élève dans cette classe.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="section-card">
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Aucune classe ne vous est attribuée pour le moment.<br>Contactez l'administrateur.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

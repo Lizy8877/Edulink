@@ -1,0 +1,91 @@
+{# ================================================================
+   dashboard.html — Page d'accueil de l'espace Admin
+   Rendu par blueprints/admin/routes.py → admin.dashboard
+
+   Variables reçues :
+     - nom    : nom de l'administrateur (depuis la session)
+     - prenom : prénom de l'administrateur (depuis la session)
+================================================================ #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduLink — Accueil Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="dashboard-page">
+
+    {# ── Barre supérieure ────────────────────────────────────── #}
+    <div class="topbar">
+        <div class="topbar-brand">
+            <i class="bi bi-hexagon-fill"></i> EduLink
+        </div>
+        <div class="topbar-right">
+            <span class="role-tag" style="background:#FEE2E2; color:#991B1B;">
+                <i class="bi bi-shield-lock-fill"></i> Administrateur
+            </span>
+            {# Bouton de déconnexion — POST avec CSRF (requis par Flask-WTF) #}
+            <form method="POST" action="{{ url_for('auth.logout') }}" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-logout">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# ── Messages flash ──────────────────────────────────────── #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{{ 'alert-error' if category == 'danger' else 'alert-success' }}"
+               style="margin-bottom: 1.5rem;">
+            <i class="bi {{ 'bi-exclamation-triangle-fill' if category == 'danger' else 'bi-check-circle-fill' }}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {# ── Carte de bienvenue ──────────────────────────────────── #}
+    <div class="welcome-card">
+        <h2>Bonjour, {{ prenom }} {{ nom }} 👋</h2>
+        <p>Gérez les classes, les utilisateurs et les emplois du temps de l'établissement.</p>
+    </div>
+
+    {# ── 3 cartes de navigation ──────────────────────────────── #}
+    <div class="menu-grid">
+
+        <a href="{{ url_for('admin.classes_page') }}" class="menu-item">
+            <i class="bi bi-mortarboard-fill"></i>
+            <span>Formations</span>
+            <small style="color: var(--gray-medium); font-size: 0.78rem; font-weight: 400;">
+                Créer et gérer les classes
+            </small>
+        </a>
+
+        <a href="{{ url_for('admin.user_page') }}" class="menu-item">
+            <i class="bi bi-people-fill"></i>
+            <span>Utilisateurs</span>
+            <small style="color: var(--gray-medium); font-size: 0.78rem; font-weight: 400;">
+                Admins, profs et élèves
+            </small>
+        </a>
+
+        <a href="{{ url_for('admin.emploi_page') }}" class="menu-item">
+            <i class="bi bi-calendar-week-fill"></i>
+            <span>Planning</span>
+            <small style="color: var(--gray-medium); font-size: 0.78rem; font-weight: 400;">
+                Gérer les emplois du temps
+            </small>
+        </a>
+
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{% extends "eleve/base.html" %}
+{% block title %}Mes notes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📝 Mes notes</h1>
+    <p class="page-subtitle">
+        {% if moyenne %}Moyenne générale : <strong>{{ moyenne }}/20</strong>{% else %}Aucune note enregistrée{% endif %}
+    </p>
+</div>
+
+<div class="section-card">
+    {% if notes %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Évaluation</th>
+                    <th>Matière</th>
+                    <th>Professeur</th>
+                    <th>Date limite</th>
+                    <th>Note</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notes %}
+                <tr>
+                    <td>
+                        <strong>{{ n.nom_eval }}</strong>
+                        {% if n.description %}
+                        <div style="font-size:0.8rem; color:var(--gray-medium); margin-top:0.15rem;">
+                            {{ n.description }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>{{ n.matiere }}</td>
+                    <td>{{ n.prof_prenom }} {{ n.prof_nom }}</td>
+                    <td>{{ n.date_fin.strftime('%d/%m/%Y') if n.date_fin else '—' }}</td>
+                    <td>
+                        <span class="badge {% if n.note >= 14 %}badge-green{% elif n.note >= 10 %}badge-yellow{% else %}badge-red{% endif %}"
+                              style="font-size:0.9rem; padding:0.3rem 0.75rem;">
+                            {{ n.note }}/20
+                        </span>
+                    </td>
+                    <td>
+                        {% if n.note >= 10 %}
+                            <span class="badge badge-green">Validé</span>
+                        {% else %}
+                            <span class="badge badge-red">À revoir</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Aucune note disponible pour le moment.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

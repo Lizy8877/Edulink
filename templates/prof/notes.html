@@ -1,0 +1,101 @@
+{% extends "prof/base.html" %}
+{% block title %}Notes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📝 Gestion des notes</h1>
+    <p class="page-subtitle">Attribuez et modifiez les notes par évaluation</p>
+</div>
+
+<!-- Filtre par classe -->
+<div class="section-card" style="padding:1.25rem 1.75rem;margin-bottom:1.5rem;">
+    <form method="GET" action="{{ url_for('prof.notes') }}" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <label style="font-family:'Poppins',sans-serif;font-size:0.9rem;font-weight:500;">Filtrer par classe :</label>
+        <select name="id_classe" onchange="this.form.submit()"
+                style="padding:0.5rem 0.75rem;border:1.5px solid #D1D5DB;border-radius:var(--radius);font-size:0.9rem;outline:none;cursor:pointer;">
+            <option value="">— Toutes mes classes —</option>
+            {% for c in classes %}
+                <option value="{{ c.id_classe }}" {% if id_classe_filtre == c.id_classe %}selected{% endif %}>
+                    {{ c.nom_classe }}
+                </option>
+            {% endfor %}
+        </select>
+        {% if id_classe_filtre %}
+            <a href="{{ url_for('prof.notes') }}" class="btn btn-secondary" style="font-size:0.85rem;padding:0.45rem 0.9rem;">✕ Réinitialiser</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if not evals %}
+    <div class="section-card">
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Aucune évaluation trouvée. <a href="{{ url_for('prof.evaluations') }}">Créer une évaluation ?</a></p>
+        </div>
+    </div>
+{% endif %}
+
+{% for ev in evals %}
+<div class="section-card">
+    <div class="section-card-header">
+        <div>
+            <span class="section-card-title">{{ ev.nom_eval }}</span>
+            <span class="badge badge-blue" style="margin-left:0.6rem;">{{ ev.nom_classe }}</span>
+        </div>
+        <span style="font-size:0.82rem;color:var(--gray-medium);">
+            Limite : {{ ev.date_fin.strftime('%d/%m/%Y') if ev.date_fin else '—' }}
+        </span>
+    </div>
+
+    {% if ev.eleves %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Élève</th>
+                    <th>Note actuelle</th>
+                    <th>Attribuer / Modifier</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eleve in ev.eleves %}
+                <tr>
+                    <td><strong>{{ eleve.nom }}</strong> {{ eleve.prenom }}</td>
+                    <td>
+                        {% if eleve.note is not none %}
+                            <span class="badge {% if eleve.note >= 10 %}badge-green{% else %}badge-red{% endif %}">
+                                {{ eleve.note | round(1) }} / 20
+                            </span>
+                        {% else %}
+                            <span class="note-absent">Non noté</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('prof.attribuer_note') }}" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="id_eval"  value="{{ ev.id_eval }}">
+                            <input type="hidden" name="id_eleve" value="{{ eleve.id_user }}">
+                            {% if eleve.id_note %}
+                                <input type="hidden" name="id_note" value="{{ eleve.id_note }}">
+                            {% endif %}
+                            <input type="number" name="note" class="input-note"
+                                   min="0" max="20" step="0.5"
+                                   value="{{ eleve.note if eleve.note is not none else '' }}"
+                                   placeholder="—" required>
+                            <button type="submit" class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 0.85rem;">
+                                {{ '✓ Modifier' if eleve.id_note else '✓ Attribuer' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">👤</div>
+            <p>Aucun élève dans cette classe.</p>
+        </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,87 @@
+{# ================================================================
+   classe.html — Gestion des Classes
+   Hérite de admin/layout.html (sidebar + head communs).
+
+   Variables reçues depuis admin.py (route /classes) :
+     - classes : liste de dicts {id_classe, nom_classe}
+
+   Routes utilisées :
+     - add_class  (POST /admin/add-class) : créer une classe
+     - emploi_page (GET /emploi-du-temps) : voir le planning d'une classe
+================================================================ #}
+{% extends 'admin/layout.html' %}
+
+{% block title %}EduLink — Formations{% endblock %}
+
+{% block content %}
+
+    {# ── En-tête de page ─────────────────────────────────────── #}
+    <header class="page-header">
+        <h2>Gestion des Classes</h2>
+        <p>Créez de nouvelles sections ou consultez les plannings par formation.</p>
+    </header>
+
+    {# ── Formulaire de création d'une nouvelle classe ─────────── #}
+    {# Envoie un POST à add_class avec le champ "nom_classe" #}
+    <div class="card" style="margin-bottom: 2.5rem;">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bi bi-plus-square" style="color: var(--gray-medium);"></i>
+            Nouvelle Formation
+        </h3>
+        <form action="{{ url_for('admin.add_class') }}" method="POST"
+              style="display: flex; gap: 1rem; align-items: flex-end;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label>Nom de la classe</label>
+                <input type="text" name="nom_classe"
+                       placeholder="Ex: BTS SIO 2, Master Cybersécurité…" required>
+            </div>
+            <button type="submit" class="btn-primary" style="width: auto; height: 46px;">
+                <i class="bi bi-plus-circle"></i> Ajouter
+            </button>
+        </form>
+    </div>
+
+    {# ── Liste des classes existantes ─────────────────────────── #}
+    <h3 style="font-family: 'Poppins'; margin-bottom: 1.5rem; color: var(--gray-dark);">
+        Formations Actives
+    </h3>
+
+    {# Grille responsive : chaque carte représente une classe.
+       Un clic redirige vers l'emploi du temps de cette classe
+       en passant son id en paramètre GET (classe_id). #}
+    <div class="grid-auto">
+        {% for c in classes %}
+        {# Conteneur relatif pour superposer le bouton supprimer sur la carte #}
+        <div style="position: relative;">
+            <a href="{{ url_for('admin.emploi_page') }}?classe_id={{ c.id_classe }}" class="class-card">
+                <div class="class-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div class="class-name">{{ c.nom_classe }}</div>
+                <div class="class-link">
+                    Voir le planning <i class="bi bi-arrow-right-short"></i>
+                </div>
+            </a>
+            {# Bouton supprimer positionné en haut à droite de la carte.
+               z-index:1 pour rester cliquable au-dessus du lien. #}
+            <form action="{{ url_for('admin.delete_class', id_classe=c.id_classe) }}" method="POST"
+                  onsubmit="return confirm('Supprimer la classe {{ c.nom_classe }} ?');"
+                  style="position: absolute; top: 0.75rem; right: 0.75rem; margin: 0; z-index: 1;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-danger" title="Supprimer cette classe"
+                        style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </form>
+        </div>
+        {% else %}
+        {# Affiché si la liste "classes" est vide #}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <i class="bi bi-folder2-open"></i>
+            <p>Aucune classe enregistrée pour le moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

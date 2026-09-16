@@ -1,0 +1,468 @@
+/* ================================================================
+   EduLink — Espace Élève
+   Styles spécifiques au layout élève (reprend la structure prof)
+   ================================================================ */
+
+/* ── Layout principal ────────────────────────────────────────── */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--white);
+    box-shadow: 2px 0 16px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.sidebar-header {
+    padding: 1.75rem 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.logo-icon { font-size: 1.4rem; }
+.logo-text {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--blue-primary);
+}
+
+.sidebar-role {
+    font-size: 0.75rem;
+    color: var(--gray-medium);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ── Navigation ──────────────────────────────────────────────── */
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius);
+    color: var(--gray-dark);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    text-decoration: none;
+}
+
+.nav-item:hover {
+    background: var(--blue-light);
+    color: var(--blue-primary);
+    text-decoration: none;
+}
+
+.nav-item.active {
+    background: var(--blue-primary);
+    color: var(--white);
+}
+
+.nav-icon { font-size: 1.1rem; }
+
+/* ── Footer sidebar ──────────────────────────────────────────── */
+.sidebar-footer {
+    padding: 1rem 1.25rem 1.5rem;
+    border-top: 1px solid var(--gray-light);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--blue-primary);
+    color: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.user-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-dark);
+}
+
+.user-classe {
+    font-size: 0.75rem;
+    color: var(--gray-medium);
+}
+
+.btn-logout {
+    width: 100%;
+    padding: 0.55rem;
+    background: transparent;
+    border: 1.5px solid #E5E7EB;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--gray-medium);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.btn-logout:hover {
+    background: #FEF2F2;
+    border-color: var(--error);
+    color: var(--error);
+}
+
+/* ── Main content ────────────────────────────────────────────── */
+.main-content {
+    flex: 1;
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+    background: var(--blue-light);
+}
+
+/* ── Page header ─────────────────────────────────────────────── */
+.page-header { margin-bottom: 2rem; }
+.page-title  { font-size: 1.6rem; color: var(--gray-dark); margin-bottom: 0.3rem; }
+.page-subtitle { font-size: 0.9rem; color: var(--gray-medium); }
+
+/* ── Stat cards ──────────────────────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 52px;
+    height: 52px;
+    background: var(--blue-light);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--blue-primary);
+    line-height: 1;
+}
+
+.stat-label { font-size: 0.8rem; color: var(--gray-medium); margin-top: 0.2rem; }
+
+/* ── Section card ────────────────────────────────────────────── */
+.section-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.section-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-dark);
+}
+
+/* ── Grid 2 colonnes ─────────────────────────────────────────── */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ── Table ───────────────────────────────────────────────────── */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 0.6rem 0.85rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--gray-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--gray-light);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.data-table td {
+    padding: 0.7rem 0.85rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #FAFBFF; }
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+}
+
+.badge-blue   { background: var(--blue-light); color: var(--blue-primary); }
+.badge-green  { background: #DCFCE7; color: var(--success); }
+.badge-yellow { background: #FEF9C3; color: #92400E; }
+.badge-red    { background: #FEE2E2; color: var(--error); }
+
+/* ── Bouton principal ────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+    text-decoration: none;
+}
+
+.btn-primary { background: var(--blue-primary); color: var(--white); width: auto; }
+.btn-primary:hover { background: var(--blue-hover); box-shadow: var(--shadow-hover); transform: translateY(-1px); text-decoration: none; color: var(--white); }
+
+.btn-secondary { background: var(--gray-light); color: var(--gray-dark); }
+.btn-secondary:hover { background: #E5E7EB; text-decoration: none; color: var(--gray-dark); }
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--gray-medium); }
+.empty-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.empty-state p    { font-size: 0.9rem; }
+
+/* ── Flash messages ──────────────────────────────────────────── */
+.flash-container { margin-bottom: 1.5rem; }
+
+.flash {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.flash-success {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    border-left: 4px solid var(--success);
+    color: var(--success);
+}
+
+.flash-error {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 4px solid var(--error);
+    color: var(--error);
+}
+
+/* ── Cours card (dashboard) ──────────────────────────────────── */
+.cours-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-left: 4px solid var(--blue-primary);
+}
+
+.cours-time {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--blue-primary);
+    white-space: nowrap;
+    min-width: 110px;
+}
+
+.cours-info { flex: 1; }
+.cours-classe { font-weight: 600; font-size: 0.95rem; }
+.cours-salle  { font-size: 0.8rem; color: var(--gray-medium); margin-top: 0.1rem; }
+
+/* ── EDT grille (même style que prof) ────────────────────────── */
+.edt-wrapper { overflow-x: auto; }
+
+.edt-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.edt-th-time {
+    width: 80px;
+    min-width: 72px;
+    padding: 0.6rem 0.5rem;
+    background: var(--gray-light);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gray-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    border-right: 2px solid #E5E7EB;
+}
+
+.edt-th-day {
+    padding: 0.6rem 0.5rem;
+    background: var(--gray-light);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-dark);
+    text-align: center;
+    border-right: 1px solid #E5E7EB;
+}
+
+.edt-th-date {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--gray-medium);
+    margin-top: 0.1rem;
+}
+
+.edt-today-header { background: var(--blue-light); color: var(--blue-primary); }
+.edt-today-header .edt-th-date { color: var(--blue-primary); }
+
+.edt-td-time {
+    padding: 0.5rem 0.4rem;
+    text-align: center;
+    background: var(--gray-light);
+    border-right: 2px solid #E5E7EB;
+    border-bottom: 1px solid #E5E7EB;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.edt-time-start {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-dark);
+}
+
+.edt-time-end {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--gray-medium);
+    margin-top: 0.1rem;
+}
+
+.edt-td-cell {
+    padding: 0.35rem;
+    border-right: 1px solid #E5E7EB;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+    min-height: 52px;
+    height: 52px;
+}
+
+.edt-today-col { background: #F5F8FF; }
+
+.edt-cours-pill {
+    background: var(--blue-primary);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 0.35rem 0.55rem;
+    height: 100%;
+}
+
+.edt-cours-matiere {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.edt-cours-prof {
+    font-size: 0.7rem;
+    opacity: 0.88;
+    margin-top: 0.1rem;
+}
+
+.edt-cours-salle {
+    font-size: 0.7rem;
+    opacity: 0.85;
+    margin-top: 0.05rem;
+}

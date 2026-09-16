@@ -1,0 +1,290 @@
+{# ================================================================
+   utilisateur.html — Gestion des Utilisateurs
+   Hérite de admin/layout.html (sidebar + head communs).
+
+   Variables reçues :
+     - users   : liste de tous les utilisateurs avec leur rôle et classe
+     - roles   : liste des rôles disponibles
+     - classes : liste des classes
+
+   Routes utilisées :
+     - admin.add_user           POST /admin/add-user
+     - admin.update_user_class  POST /admin/update-user-class
+     - admin.delete_user        POST /admin/delete-user/<id>
+================================================================ #}
+{% extends 'admin/layout.html' %}
+
+{% block title %}EduLink — Utilisateurs{% endblock %}
+
+{% block content %}
+
+    {# ── En-tête de page ─────────────────────────────────────── #}
+    <header class="page-header">
+        <h2>Gestion des Utilisateurs</h2>
+        <p>Ajoutez de nouveaux membres, filtrez et gérez les comptes existants.</p>
+    </header>
+
+    {# ── Formulaire d'ajout d'un utilisateur ──────────────────── #}
+    <div class="card" style="margin-bottom: 2.5rem;">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bi bi-person-plus" style="color: var(--gray-medium);"></i>
+            Ajouter un utilisateur
+        </h3>
+
+        <form action="{{ url_for('admin.add_user') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" name="nom" placeholder="Ex: Dupont" required>
+                </div>
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input type="text" name="prenom" placeholder="Ex: Jean" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Identifiant (Compte)</label>
+                    <input type="text" name="compte" placeholder="Email ou pseudo" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" name="mdp" placeholder="Définir un mot de passe" autocomplete="new-password" required>
+                </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label>Rôle</label>
+                    <select name="id_role" id="role_select" class="select-modern"
+                            required>
+                        <option value="">-- Sélectionner un rôle --</option>
+                        {% for r in roles %}
+                            <option value="{{ r.id_role }}" data-name="{{ r.nom_role }}">
+                                {{ r.nom_role }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" id="matiere_group" style="display: none;">
+                    <label>Matière enseignée</label>
+                    <input type="text" name="matiere" id="matiere_input"
+                           placeholder="Ex: Mathématiques">
+                </div>
+
+                <div class="form-group" id="classe_group" style="display: none;">
+                    <label>Assigner à une classe</label>
+                    <select name="id_classe" class="select-modern">
+                        <option value="">-- Sans classe --</option>
+                        {% for c in classes %}
+                            <option value="{{ c.id_classe }}">{{ c.nom_classe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: auto;">
+                <i class="bi bi-save"></i> Enregistrer l'utilisateur
+            </button>
+        </form>
+    </div>
+
+    {# ── Tableau avec filtres ─────────────────────────────────── #}
+    <div class="card">
+        <div style="display: flex; align-items: center; justify-content: space-between;
+                    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                <i class="bi bi-card-list" style="color: var(--gray-medium);"></i>
+                Répertoire des membres
+            </h3>
+            {# Compteur mis à jour par le JS ─────────────────── #}
+            <span id="user-count" class="badge-accent">
+                {{ users|length }} utilisateur(s)
+            </span>
+        </div>
+
+        {# ── Barre de filtres ────────────────────────────────── #}
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+                    padding: 1.25rem; background: var(--blue-light);
+                    border-radius: var(--radius);">
+
+            {# Recherche texte libre #}
+            <div style="flex: 2; min-width: 200px;">
+                <label style="font-size: 0.75rem; font-weight: 600; color: var(--gray-medium);
+                               text-transform: uppercase; letter-spacing: 0.05em;
+                               display: block; margin-bottom: 0.4rem;">
+                    <i class="bi bi-search"></i> Rechercher
+                </label>
+                <input type="text" id="filter-search"
+                       placeholder="Nom, prénom ou identifiant…"
+                       oninput="filterTable()"
+                       style="width: 100%; padding: 0.6rem 1rem; border: 1.5px solid #D1D5DB;
+                              border-radius: var(--radius); font-size: 0.9rem; outline: none;
+                              transition: border-color 0.2s;">
+            </div>
+
+            {# Filtre par rôle #}
+            <div style="flex: 1; min-width: 150px;">
+                <label style="font-size: 0.75rem; font-weight: 600; color: var(--gray-medium);
+                               text-transform: uppercase; letter-spacing: 0.05em;
+                               display: block; margin-bottom: 0.4rem;">
+                    <i class="bi bi-shield"></i> Rôle
+                </label>
+                <select id="filter-role" class="select-modern">
+                    <option value="">Tous les rôles</option>
+                    {% for r in roles %}
+                        <option value="{{ r.nom_role }}">{{ r.nom_role }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# Filtre par classe #}
+            <div style="flex: 1; min-width: 150px;">
+                <label style="font-size: 0.75rem; font-weight: 600; color: var(--gray-medium);
+                               text-transform: uppercase; letter-spacing: 0.05em;
+                               display: block; margin-bottom: 0.4rem;">
+                    <i class="bi bi-mortarboard"></i> Classe
+                </label>
+                <select id="filter-classe" class="select-modern">
+                    <option value="">Toutes les classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c.nom_classe }}">{{ c.nom_classe }}</option>
+                    {% endfor %}
+                    <option value="__aucune__">Sans classe</option>
+                </select>
+            </div>
+
+            {# Bouton reset #}
+            <div style="display: flex; align-items: flex-end;">
+                <button id="btn-reset-filters" class="btn-logout"
+                        title="Effacer les filtres">
+                    <i class="bi bi-x-circle"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+
+        {# ── Message "aucun résultat" ─────────────────────────── #}
+        <div id="empty-filter" style="display: none; text-align: center;
+             padding: 3rem; color: var(--gray-medium);">
+            <i class="bi bi-search" style="font-size: 2rem; opacity: 0.4;
+               display: block; margin-bottom: 0.75rem;"></i>
+            Aucun utilisateur ne correspond aux filtres.
+        </div>
+
+        {# ── Tableau ─────────────────────────────────────────── #}
+        <div class="table-overflow">
+            <table class="table" id="users-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th>Utilisateur</th>
+                        <th>Rôle</th>
+                        <th>Informations</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr data-nom="{{ user.nom|lower }} {{ user.prenom|lower }}"
+                        data-compte="{{ user.compte|lower }}"
+                        data-role="{{ user.nom_role }}"
+                        data-classe="{{ user.nom_classe if user.nom_classe else '' }}">
+
+                        <td style="color: var(--gray-medium); font-size: 0.85rem;">
+                            #{{ user.id_user }}
+                        </td>
+
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div class="avatar">
+                                    {{ user.prenom[0] }}{{ user.nom[0] }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600;">
+                                        {{ user.prenom }} {{ user.nom }}
+                                    </div>
+                                    <div style="font-size: 0.82rem; color: var(--gray-medium);">
+                                        {{ user.compte }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="badge-role
+                                {% if user.nom_role == 'Admin' %}r-admin
+                                {% elif user.nom_role == 'Professeur' %}r-prof
+                                {% else %}r-eleve{% endif %}">
+                                {% if user.nom_role == 'Admin' %}
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                {% elif user.nom_role == 'Professeur' %}
+                                    <i class="bi bi-book-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-backpack-fill"></i>
+                                {% endif %}
+                                {{ user.nom_role }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if user.nom_role == 'Professeur' %}
+                                <span style="display: flex; align-items: center; gap: 0.4rem; font-weight: 500;">
+                                    <i class="bi bi-bookmark-star" style="color: var(--gray-medium);"></i>
+                                    {{ user.matiere }}
+                                </span>
+                            {% elif user.nom_role == 'Eleve' %}
+                                <form action="{{ url_for('admin.update_user_class') }}" method="POST"
+                                      style="margin: 0; min-width: 180px;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="id_user" value="{{ user.id_user }}">
+                                    <select name="id_classe" class="select-modern auto-submit-select"
+                                            style="padding: 0.4rem 2rem 0.4rem 0.8rem; font-size: 0.85rem;">
+                                        <option value="">Aucune classe</option>
+                                        {% for c in classes %}
+                                            <option value="{{ c.id_classe }}"
+                                                {% if c.id_classe == user.id_classe %}selected{% endif %}>
+                                                {{ c.nom_classe }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            {% else %}
+                                <span style="color: var(--gray-medium);">—</span>
+                            {% endif %}
+                        </td>
+
+                        <td style="text-align: right;">
+                            <form action="{{ url_for('admin.delete_user', id_user=user.id_user) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Supprimer {{ user.prenom }} {{ user.nom }} ?');"
+                                  style="margin: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-danger" title="Supprimer">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr id="empty-table">
+                        <td colspan="5" style="text-align: center; padding: 4rem; color: var(--gray-medium);">
+                            <i class="bi bi-people" style="font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.4;"></i>
+                            Aucun utilisateur enregistré.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_utilisateurs.js') }}"></script>
+{% endblock %}
