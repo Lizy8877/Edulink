@@ -1,0 +1,13 @@
+"""
+Instances d'extensions Flask partagées entre app.py et les blueprints.
+Permet d'éviter les imports circulaires.
+"""
+
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(
+    get_remote_address,
+    default_limits=[],
+    storage_uri="memory://",
+)
