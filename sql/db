@@ -1,0 +1,63 @@
+// 1. Table des rôles (Pour ton système de permission RBAC)
+Table Roles {
+  id_role int [pk, increment]
+  nom_role varchar [note: "'Admin', 'Professeur' ou 'Eleve'"]
+}
+
+// 2. Table unifiée des utilisateurs (Facilite la connexion sur Flask !)
+Table Utilisateurs {
+  id_user int [pk, increment]
+  id_role int [ref: > Roles.id_role]
+  compte varchar [unique, note: "Email ou pseudo"]
+  mdp varchar [note: "Sera haché (bcrypt)"]
+  nom varchar 
+  prenom varchar
+  matiere varchar [note: "Rempli uniquement si c'est un prof"]
+  id_classe int [ref: > Classes.id_classe, note: "Rempli uniquement si c'est un élève"]
+}
+
+// 3. Table des classes
+Table Classes {
+  id_classe int [pk, increment]
+  nom_classe varchar [note: "Ex: 'DevSecOps GCS2'"]
+}
+
+// 4. Table de liaison Professeur <-> Classe (La bonne méthode SQL)
+Table Prof_Classe {
+  id_prof int [ref: > Utilisateurs.id_user]
+  id_classe int [ref: > Classes.id_classe]
+  indexes {
+    (id_prof, id_classe) [pk] // Empêche les doublons
+  }
+}
+
+// 5. Table Emploi du temps
+Table Emploi_du_temps {
+  id_cours int [pk, increment]
+  id_classe int [ref: > Classes.id_classe]
+  id_prof int [ref: > Utilisateurs.id_user]
+  salle varchar
+  date date
+  heure_debut time
+  heure_fin time
+}
+
+// 6. Tableau projet/evaluation
+Table Evaluation {
+  id_eval int [pk, increment]
+  id_prof int [ref: > Utilisateurs.id_user]
+  id_classe int [ref: > Classes.id_classe]
+  nom_eval varchar 
+  description varchar
+  date_fin date
+}
+
+// 7. Tableau des notes (Version Hybride)
+Table Notes {
+  id_note int [pk, increment]
+  id_eleve int [ref: > Utilisateurs.id_user]
+  id_prof int [ref: > Utilisateurs.id_user] // Toujours nécessaire pour savoir qui a noté
+  id_eval int [ref: > Evaluation.id_eval, note: "Peut être NULL si note indépendante"]
+  nom_note varchar [note: "Rempli uniquement si note indépendante (ex: 'Bonus')"]
+  note float
+}
